@@ -1,0 +1,40 @@
+jenkins:
+  systemMessage: "newtalkopt local DevSecOps pipeline (Docker Desktop, no registry)"
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID:-admin}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://localhost:8090/}"
+
+jobs:
+  - script: |
+      pipelineJob('newtalkopt') {
+        description('Single pipeline: Shared Library unit tests, source checks, Docker build and validation, image scan.')
+        properties {
+          disableConcurrentBuilds()
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('file:///repo')
+                }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

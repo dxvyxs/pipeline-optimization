@@ -1,0 +1,48 @@
+@Library('docker-build-validate@v0.1.0') _
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 45, unit: 'MINUTES')
+    }
+
+    environment {
+        IMAGE_NAME = 'example-team/example-service'
+        HADOLINT_IMAGE = 'hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d'
+    }
+
+    stages {
+        stage('Resolve revision') {
+            steps {
+                script {
+                    env.IMAGE_TAG = sh(returnStdout: true, script: 'git rev-parse --short=12 HEAD').trim()
+                }
+            }
+        }
+
+        stage('Docker Build and Validate') {
+            steps {
+                script {
+                    Map result = dockerBuildValidate(
+                        imageName: env.IMAGE_NAME,
+                        imageTag: env.IMAGE_TAG,
+                        dockerfile: 'Dockerfile',
+                        context: '.',
+                        platforms: ['linux/amd64'],
+                        releaseTarget: 'runtime',
+                        testTarget: 'test',
+                        hadolintImage: env.HADOLINT_IMAGE,
+                        buildArgs: [VERSION: env.IMAGE_TAG],
+                        forbiddenPaths: ['bin/sh'],
+                        smokeTestTmpfs: ['/tmp'],
+                        healthTimeoutSeconds: 60
+                    )
+                    echo "Validated local image ${result.nativeImage}"
+                }
+            }
+        }
+    }
+}

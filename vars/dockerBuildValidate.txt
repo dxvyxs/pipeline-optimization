@@ -1,0 +1,33 @@
+<p>
+<b>dockerBuildValidate</b>: lint, test, build and validate a Docker image with the local Docker engine through
+Buildx. The step never pushes to a registry.
+</p>
+<p>
+Order: configuration validation; <code>buildx --check</code> and optional hadolint; the Dockerfile test target
+(<code>--output type=cacheonly</code>); one <code>--load</code> release build per platform, tagged
+<code>name:tag-arch</code>; validation, which requires a numeric non-root USER, checks optional forbidden paths, and on
+the engine's native platform runs a hardened smoke test that needs a HEALTHCHECK and an allowed exit code after
+SIGTERM. Any failure stops the step and fails the build. Temporary containers are always removed.
+</p>
+<p>Example:</p>
+<pre>
+Map result = dockerBuildValidate(
+    imageName: 'team/app',
+    imageTag: env.IMAGE_TAG,
+    dockerfile: 'Dockerfile',
+    context: '.',
+    platforms: ['linux/amd64', 'linux/arm64'],
+    forbiddenPaths: ['bin/sh'],
+    smokeTestTmpfs: ['/tmp']
+)
+</pre>
+<p>
+Options: imageName (required), imageTag, dockerfile, context, platforms, releaseTarget, testTarget, lint,
+runTests, build, validate, smokeTest, hadolintImage, builder, cacheDir, buildArgs, labels, secrets,
+forbiddenPaths, healthTimeoutSeconds, stopTimeoutSeconds, allowedExitCodes, smokeTestEnv, smokeTestTmpfs,
+smokeTestMemory. Unknown options are rejected.
+</p>
+<p>
+Returns a map with images, lint, tests, build, validation, smokeTest, nativeImage and summary. See
+docs/shared-library.md in the library repository for accepted values and guarantees.
+</p>

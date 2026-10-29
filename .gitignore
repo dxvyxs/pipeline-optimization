@@ -1,0 +1,14 @@
+build/
+.gradle/
+out/
+*.log
+*.tar
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+.scratch/
+.idea/
+.vscode/

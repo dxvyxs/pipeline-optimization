@@ -1,0 +1,7 @@
+**
+!settings.gradle
+!build.gradle
+!vars/
+!vars/**
+!test/
+!test/**

@@ -1,0 +1,14 @@
+unclassified:
+  globalLibraries:
+    libraries:
+      - name: "docker-build-validate"
+        defaultVersion: "v0.1.0"
+        allowVersionOverride: true
+        implicit: false
+        includeInChangesets: false
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: "<LIBRARY_REPOSITORY_URL>"
+                credentialsId: "<READ_ONLY_CHECKOUT_CREDENTIAL_ID>"
